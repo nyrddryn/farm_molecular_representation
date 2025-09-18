@@ -1,6 +1,5 @@
 # FARM for Molecular Representation
-Source code for the paper **FARM: Functional Group-Aware Representations for Small Molecules** [paper](https://arxiv.org/pdf/2410.02082) [webpage](https://thaonguyen217.github.io/farm/)
-![FARM model](./images/main.jpg)
+Source code for the paper **FARM: Enhancing Molecular Representations with Functional Group Awareness**
 
 # Table of Contents
 1. [Structure of the Repository](#structure-of-the-repository)
@@ -73,8 +72,8 @@ To extract molecular embeddings for FG-enhanced SMILES, you can use the Hugging 
 from transformers import BertForMaskedLM, PreTrainedTokenizerFast
 
 # Load the tokenizer and model
-tokenizer = PreTrainedTokenizerFast.from_pretrained('thaonguyen217/farm_molecular_representation')
-model = BertForMaskedLM.from_pretrained('thaonguyen217/farm_molecular_representation')
+tokenizer = PreTrainedTokenizerFast.from_pretrained('./models/farm_tokenizer')
+model = BertForMaskedLM.from_pretrained('./models/farm_model')
 
 # Example usage
 input_text = "N_primary_amine N_secondary_amine c_6-6 1 n_6-6 n_6-6 c_6-6 c_6-6 2 c_6-6 c_6-6 c_6-6 c_6-6 c_6-6 1 2"  # FG-enhanced representation of NNc1nncc2ccccc12
@@ -218,18 +217,4 @@ Run `(1)classifier.py` or `(2)regressor.py` with arguments:
 **Example**:
 ```bash
 python classifier.py --train_path path/to/train.pkl --val_path path/to/val.pkl --test_path path/to/test.pkl --checkpoint_path path/to/save/checkpoint
-```
-
-## Acknowledgments
-This research is based upon work supported by the Molecule Maker Lab Institute: an AI research institute program supported by NSF under award *No. 2019897*.
-
-## References
-If you build upon or utilize our work, please cite the following paper:
-```
-@article{nguyen2024farm,
-  title={{FARM}: Functional Group-Aware Representations for Small Molecules},
-  author={Thao Nguyen and Kuan-Hao Huang and Ge Liu and Martin D. Burke and Ying Diao and Heng Ji},
-  journal={arXiv preprint arXiv:2410.02082},
-  year={2024}
-}
 ```
