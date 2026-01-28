@@ -37,8 +37,14 @@ def graph_data(smiles, feature_dict):
     new_structure = dict()
     for idx, sm in enumerate(structure):
         new_sm = preprocess_smiles(sm)  # Preprocess SMILES to match the feature dictionary
+        
+        # Get feature embedding and convert to numpy if it's a tensor
+        fg_feature = feature_dict.get(new_sm, np.zeros(dim))
+        if torch.is_tensor(fg_feature):
+            fg_feature = fg_feature.detach().cpu().numpy()
+        
         new_structure[idx] = {
-            'fg_feature': feature_dict.get(new_sm, np.zeros(dim)),  # Get feature or default to zero
+            'fg_feature': fg_feature,  # Get feature or default to zero
             'atom': structure[sm]['atom']  # Get atom list for fragment
         }
 
@@ -75,6 +81,13 @@ def graph_data(smiles, feature_dict):
 def main(csv_path, feature_path, save_path):
     # Load the molecular dataset CSV file
     df = pd.read_csv(csv_path)
+    
+    # Filter out rows with NaN SMILES
+    df = df.dropna(subset=['SMILES'])
+    df = df[df['SMILES'].notna()]
+    df = df[df['SMILES'] != 'nan']
+    df.reset_index(drop=True, inplace=True)
+    
     SMILES = list(df['SMILES'].values)  # SMILES strings
 
     # Load precomputed feature embeddings from the pickle file
@@ -86,10 +99,16 @@ def main(csv_path, feature_path, save_path):
     # Convert each SMILES string into a graph
     for i, sm in enumerate(tqdm(SMILES)):
         try:
+            # Skip if SMILES is not a string
+            if not isinstance(sm, str):
+                continue
+            
             g = graph_data(sm, feature_dict)
             data_list.append(g)
         except Exception as e:
-            print(f"Error processing {sm}: {e}")
+            # Only print errors that are not about tensor.detach()
+            if "requires grad" not in str(e):
+                print(f"Error processing {sm}: {e}")
             continue
 
     # Print the size of the original dataset and the successfully processed data

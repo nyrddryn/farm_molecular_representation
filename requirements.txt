@@ -1,8 +1,8 @@
 datasets==2.11.0
 numpy==1.23.5
 pandas==1.5.3
-deepchem==2.6.0
-rdkit-pypi==2023.03.5.0
+deepchem
+rdkit-pypi
 torch==2.0.1
 torch-geometric==2.2.0
 tqdm==4.65.0

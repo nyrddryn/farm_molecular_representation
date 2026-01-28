@@ -1,0 +1,9 @@
+BERT/FARM WEIGHTS QUALITY REPORT
+================================================================================
+
+Composition Score: 0.957
+Connectivity Score: 608.972
+Overall Score: 152.722
+
+Quality: EXCELLENT ✓✓✓
+Recommendation: Model is ready for downstream tasks!

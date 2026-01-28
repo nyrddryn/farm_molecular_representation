@@ -5,6 +5,13 @@ import torch.nn.functional as F
 from datasets import Dataset
 from torch.utils.data import DataLoader
 from transformers import PreTrainedTokenizerFast, BertModel, Trainer, TrainingArguments
+import ssl
+import os
+
+# Disable SSL verification for HuggingFace downloads (temporary workaround for certificate issues)
+os.environ['CURL_CA_BUNDLE'] = ''
+os.environ['REQUESTS_CA_BUNDLE'] = ''
+ssl._create_default_https_context = ssl._create_unverified_context
 
 # Suppress warnings
 import warnings
@@ -16,8 +23,8 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 # Constants
 MAX_LENGTH = 200
 MASKED_PERCENTAGE = 0.35
-BATCH_SIZE = 128
-NUM_EPOCHS = 10
+BATCH_SIZE = 64
+NUM_EPOCHS = 100
 LEARNING_RATE = 1e-5
 WEIGHT_DECAY = 0.01
 
@@ -182,11 +189,13 @@ def main(train_paths, val_path, tokenizer_path, pretrained_model_path, output_di
         num_train_epochs=NUM_EPOCHS,
         weight_decay=WEIGHT_DECAY,
         logging_dir='../logs',
-        logging_steps=10,
-        save_steps=30,
+        logging_strategy="epoch",
         save_strategy="epoch",
         evaluation_strategy="epoch",
         load_best_model_at_end=True,
+        metric_for_best_model="loss",
+        greater_is_better=False,
+        save_total_limit=2,  # Only keep best and last checkpoint
     )
 
     # Initialize the custom Trainer with dataloaders

@@ -118,6 +118,7 @@ def train_model(data_path, checkpoint_path, atom_feature_dim=128, hidden_channel
     for e in range(epochs):
         train_loss = 0
         for c, data in enumerate(tqdm(train_dataloader, desc=f'Epoch {e + 1}')):
+            # print(f'Batch {c + 1}')
             optimizer.zero_grad()
             data.x = np.vstack([data.x[i] for i in range(len(data.x))])
             edge_logits, edge_index_pairs, _ = model(data)
@@ -145,7 +146,7 @@ def train_model(data_path, checkpoint_path, atom_feature_dim=128, hidden_channel
         
         print(f'Training loss: {train_loss / len(train_dataloader)}')
         # Save checkpoint every 500,000 steps
-        if c % 500000 == 0:
+        if c % 1 == 0:
             torch.save(model.state_dict(), f'{checkpoint_path}{model_name}_epoch{e + 1}.pth')
 
 
@@ -158,7 +159,7 @@ if __name__ == '__main__':
     parser.add_argument('--hidden_channels', type=int, default=128, help='Number of hidden channels for GNN.')
     parser.add_argument('--batch_size', type=int, default=2, help='Batch size for training.')
     parser.add_argument('--lr', type=float, default=1e-4, help='Learning rate for the optimizer.')
-    parser.add_argument('--epochs', type=int, default=5, help='Number of epochs to train.')
+    parser.add_argument('--epochs', type=int, default=50, help='Number of epochs to train.')
     parser.add_argument('--model_name', type=str, default='link_prediction_model', help='Name of the model for saving checkpoints.')
 
     args = parser.parse_args()

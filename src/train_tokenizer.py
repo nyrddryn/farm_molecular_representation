@@ -1,4 +1,7 @@
 import argparse
+import pickle
+import os
+import tempfile
 from tokenizers import Tokenizer, models, pre_tokenizers, trainers
 from transformers import PreTrainedTokenizerFast
 
@@ -7,7 +10,7 @@ def main(corpus_path, save_path, vocab_size=30000, min_frequency=5):
     Main function to create and save a tokenizer from the provided corpus.
 
     Args:
-        corpus_path (str): Path to the text corpus for training the tokenizer.
+        corpus_path (str): Path to the text corpus for training the tokenizer (.txt or .pkl).
         save_path (str): Directory to save the trained tokenizer.
         vocab_size (int): Size of the vocabulary to be created.
         min_frequency (int): Minimum frequency for tokens to be included in the vocabulary.
@@ -27,7 +30,32 @@ def main(corpus_path, save_path, vocab_size=30000, min_frequency=5):
         show_progress=True,
         special_tokens=special_tokens
     )
-    tokenizer.train([corpus_path], trainer=trainer)
+    
+    # Check if corpus is .pkl or .txt
+    if corpus_path.endswith('.pkl'):
+        print(f"Loading pickle corpus from {corpus_path}...")
+        with open(corpus_path, 'rb') as f:
+            corpus_list = pickle.load(f)
+        print(f"Loaded {len(corpus_list)} FG-enhanced SMILES")
+        
+        # Create a temporary text file for training
+        temp_file = tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt', encoding='utf-8')
+        temp_path = temp_file.name
+        
+        print(f"Writing corpus to temporary text file...")
+        for smiles in corpus_list:
+            temp_file.write(smiles + '\n')
+        temp_file.close()
+        
+        print(f"Training tokenizer...")
+        tokenizer.train([temp_path], trainer=trainer)
+        
+        # Clean up temporary file
+        os.unlink(temp_path)
+    else:
+        # Assume it's a text file
+        print(f"Training tokenizer from text file: {corpus_path}")
+        tokenizer.train([corpus_path], trainer=trainer)
     
     # Save the tokenizer to a file
     tokenizer.save("tokenizer.json")

@@ -75,8 +75,14 @@ def graph_data(smiles, feature_dict):
         new_structure = {}
         for idx, sm in enumerate(structure):
             new_sm = preprocess_smiles(sm)
+            
+            # Get feature embedding and convert to numpy if it's a tensor
+            fg_feature = feature_dict.get(new_sm, np.zeros(DIM))
+            if torch.is_tensor(fg_feature):
+                fg_feature = fg_feature.detach().cpu().numpy()
+            
             new_structure[idx] = {
-                'fg_feature': feature_dict.get(new_sm, np.zeros(DIM)),
+                'fg_feature': fg_feature,
                 'atom': structure[sm]['atom']
             }
 
@@ -107,6 +113,13 @@ def main(link_prediction_model_path, save_path, corpus_path, fgkg_embedding_path
     """Main function to run the link prediction model."""
     # Load the corpus
     df = pd.read_csv(corpus_path)
+    
+    # Filter out NaN SMILES
+    df = df.dropna(subset=['SMILES'])
+    df = df[df['SMILES'].notna()]
+    df = df[df['SMILES'] != 'nan']
+    df.reset_index(drop=True, inplace=True)
+    
     SMILES = list(df['SMILES'].values)
 
     # Load feature dictionary
